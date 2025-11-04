@@ -1,31 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-estoy en el index de horarios
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            
-            <th>Aula</th>
-            <th>Modulo</th>
-            <th>Curso</th>
-            <th>Día</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($horarios as $horario)
+<div class="container">
+    <h3>Horarios - {{ $curso->anio }}° {{ $curso->division }}</h3>
+
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                
-                <td>{{ $horario->aula_id }}</td>
-                <td>{{ $horario->modulo_id }}</td>
-                <td>{{ $horario->curso_id }}</td>
-                <td>{{ $horario->dia }}</td>
-                
+                <th>Módulo</th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
             </tr>
-        @endforeach
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach($modulos as $modulo)
+                <tr>
+                    <td>{{ $modulo->hora_inicio }} - {{ $modulo->hora_fin }}</td>
 
+                    @for($d = 1; $d <= 5; $d++)
+                        <td>
+                            @if(isset($grid[$modulo->id][$d]))
+                                {{ $grid[$modulo->id][$d]->aula->nombre ?? '—' }}
+                            @else
+                                —
+                            @endif
+                        </td>
+                    @endfor
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 
-   
+    <a href="{{ route('horarios.edit', $curso) }}" class="btn btn-primary">Editar</a>
+</div>
 @endsection

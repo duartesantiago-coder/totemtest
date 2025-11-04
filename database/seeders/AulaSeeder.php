@@ -15,6 +15,7 @@ class AulaSeeder extends Seeder
      */
     public function run()
     {
+        Aula::create(['nombre' => 'Vacío']); //X
         Aula::create(['nombre' => 'Aula Maker']); //X
         Aula::create(['nombre' => 'Matemática']); //X
         Aula::create(['nombre' => 'Lengua Extranjera']); //X
@@ -26,6 +27,8 @@ class AulaSeeder extends Seeder
         Aula::create(['nombre' => 'Gim']); //X
         Aula::create(['nombre' => 'Invernadero']); //X
         Aula::create(['nombre' => 'Aula Roja']); //X
+        
+
 
     }
 }

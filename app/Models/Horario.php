@@ -11,9 +11,9 @@ class Horario extends Model
         'aula_id','modulo_id','curso_id','user_id','dia'
     ];
 
-    public function aula() { return $this->belongsTo(Aula::class); }
-    public function modulo() { return $this->belongsTo(Modulo::class); }
-    public function curso() { return $this->belongsTo(Curso::class); }
+    public function aula() { return $this->belongsTo(Aula::class, 'aula_id'); }
+    public function modulo() { return $this->belongsTo(Modulo::class, 'modulo_id'); }
+    public function curso() { return $this->belongsTo(Curso::class, 'curso_id'); }
     public function user() { return $this->belongsTo(User::class); }
 
     

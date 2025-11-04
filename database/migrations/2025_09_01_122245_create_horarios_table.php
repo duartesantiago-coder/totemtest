@@ -11,7 +11,7 @@ class CreateHorariosTable extends Migration
     {
         Schema::create('horarios', function (Blueprint $table) {
             $table->id(); // id_horario
-            $table->unsignedBigInteger('aula_id');
+            $table->unsignedBigInteger('aula_id')->nullable();
             $table->unsignedBigInteger('modulo_id');
             $table->unsignedBigInteger('curso_id');
             $table->unsignedBigInteger('user_id')->nullable(); // preceptor/creador

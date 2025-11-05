@@ -43,8 +43,87 @@ class HorarioController extends Controller
             $grid[$h->modulo_id][$h->dia] = $h;
         }
 
-        return view('horarios.edit', compact('curso','modulos','aulas','grid'));
+        return view('horarios.edit', compact('curso','modulos','aulas','grid', ));
     }
+    public function dia($dia)
+    {
+        $modulos = Modulo::orderBy('id')->get();
+        $cursos = Curso::orderBy('nombre')->get();
+        $aulas = Aula::orderBy('nombre')->get();
+
+        $vacíoId = Aula::where('nombre', 'Vacío')->value('id');
+
+        // Traemos todos los horarios del día con relaciones
+        $horarios = Horario::with(['aula', 'modulo', 'curso'])
+            ->where('dia', $dia)
+            ->get();
+
+        // Creamos un array organizado por curso y módulo
+        $grid = [];
+        foreach ($cursos as $curso) {
+            foreach ($modulos as $modulo) {
+                $horario = $horarios
+                    ->where('curso_id', $curso->id)
+                    ->where('modulo_id', $modulo->id)
+                    ->first();
+
+                $grid[$curso->id][$modulo->id] = $horario && $horario->aula_id != $vacíoId
+                    ? $horario->aula->nombre
+                    : 'Vacío';
+            }
+        }
+
+        // Filtrar cursos completamente vacíos (usar array vacío si no hay entradas para evitar "Clave de matriz no definida")
+        $cursosVisibles = $cursos->filter(function ($curso) use ($grid) {
+            return collect($grid[$curso->id] ?? [])->contains(function ($aula) {
+                return $aula !== 'Vacío';
+            });
+        });
+
+        return view('horarios.dia', compact('modulos', 'cursosVisibles', 'grid', 'dia'));
+    }
+
+    // Mostrar la tabla principal por día (ejemplo: /horarios/dia/1)
+    public function mostrarPorDia($dia)
+    {
+        // Obtener módulos, días y cursos
+        $modulos = \App\Models\Modulo::orderBy('id')->get();
+        $dias = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes'];
+        $nombreDia = $dias[$dia] ?? 'Desconocido';
+
+        // Traer todos los horarios de ese día con relaciones
+        $horarios = Horario::with(['curso', 'aula', 'modulo'])
+            ->where('dia', $dia)
+            ->get();
+
+        // Construir grid [curso_id][modulo_id] => aulaNombre | 'Vacío'
+        $cursos = Curso::orderBy('anio')->orderBy('division')->get();
+        $vacioId = Aula::where('nombre', 'Vacío')->value('id');
+        $grid = [];
+
+        foreach ($cursos as $curso) {
+            foreach ($modulos as $modulo) {
+                $horario = $horarios
+                    ->where('curso_id', $curso->id)
+                    ->where('modulo_id', $modulo->id)
+                    ->first();
+
+                $grid[$curso->id][$modulo->id] = $horario && $horario->aula_id != $vacioId
+                    ? ($horario->aula->nombre ?? 'Vacío')
+                    : 'Vacío';
+            }
+        }
+
+        // Filtrar cursos que tengan al menos una aula distinta de 'Vacío'
+        $cursosVisibles = $cursos->filter(function ($curso) use ($grid) {
+            return collect($grid[$curso->id] ?? [])->contains(function ($aula) {
+                return $aula !== 'Vacío';
+            });
+        });
+
+        return view('horarios.dia', compact('modulos', 'cursosVisibles', 'grid', 'dia', 'nombreDia', 'cursos'));
+    }
+
 
     // Guardar (actualiza varios horarios)
     public function update(Request $request, Curso $curso)
@@ -60,6 +139,13 @@ class HorarioController extends Controller
             }
         }
 
+
         return redirect()->route('horarios.index', $curso)->with('success','Horarios actualizados.');
     }
 }
+// si aparece Clave de matriz no definida 1 en horarios/dia.blade.php
+// es porque no se están pasando los datos correctos a la vista desde el controlador HorarioController.php
+// tenés que asegurarte de que en el método mostrarPorDia se estén pasando las variables correctas a la vista
+// tenés que agregar compact('cursos','dia','nombreDia','horarios','modulos', 'cursosVisibles', 'grid');
+// al final del return view(...) en el método mostrarPorDia y si lo estas haciendo bien, revisar que los nombres de las variables en la vista coincidan con los que se están pasando desde el controlador
+// grid deberia estar 

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Curso;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -21,11 +21,9 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
-    {
-        $a=1;
-        dd($a);
-        return view('home');
-        
+    
+    public function index() {
+        $cursos = Curso::orderBy('anio')->orderBy('division')->get();
+        return view('home', compact('cursos'));
     }
 }

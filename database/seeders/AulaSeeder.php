@@ -15,7 +15,7 @@ class AulaSeeder extends Seeder
      */
     public function run()
     {
-        Aula::create(['nombre' => 'Vacío']); //X
+        Aula::create(['nombre' => 'Vacío']); // 
         Aula::create(['nombre' => 'Aula Maker']); //X
         Aula::create(['nombre' => 'Matemática']); //X
         Aula::create(['nombre' => 'Lengua Extranjera']); //X

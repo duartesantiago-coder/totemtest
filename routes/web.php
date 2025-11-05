@@ -21,7 +21,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])
     ->name('home');
 
 Route::middleware(['auth'])->group(function () {
@@ -38,12 +38,5 @@ Route::prefix('cursos/{curso}')->group(function () { // lo que hace es agrupar l
     Route::get('horarios/edit', [HorarioController::class, 'edit'])->name('horarios.edit');
     Route::put('horarios', [HorarioController::class, 'update'])->name('horarios.update');
 });
-// si aparece este error: Class 'App\Http\Controllers\HorarioController' not found
-// agregar al inicio del archivo web.php:
-// use App\Http\Controllers\HorarioController;
-// si aparece este error: "Class "Controller" not found" en HorarioController.php
-// agregar al inicio del archivo HorarioController.php:
-// use App\Http\Controllers\Controller;
-  //      return redirect()->route('horarios.index', ['curso' => $curso->id])->with('success','Horarios actualizados.');
-   // }
-//}   
+Route::get('/horarios/dia/{dia}', [HorarioController::class, 'mostrarPorDia'])->name('horarios.dia');
+

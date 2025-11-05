@@ -36,7 +36,7 @@ class HorarioSeeder extends Seeder
                             'curso_id'  => $curso->id,
                             'dia'       => $dia,
                             'modulo_id' => $moduloId,
-                            'aula_id'   => null, // o poner un id aleatorio: Aula::inRandomOrder()->first()->id
+                            'aula_id'   => 1, // Aula 'Vacío'
                         ]);
                     }
                 }

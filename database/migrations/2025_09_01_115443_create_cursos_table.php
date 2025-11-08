@@ -14,6 +14,7 @@ class CreateCursosTable extends Migration
             $table->integer('anio')->nullable();
             $table->string('division', 10)->nullable();
             $table->timestamps();
+            $table->enum('turno', ['mañana', 'tarde'])->default('mañana');
         });
     }
 

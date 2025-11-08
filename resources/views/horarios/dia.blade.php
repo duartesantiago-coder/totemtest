@@ -2,37 +2,47 @@
 
 @section('content')
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Horarios del día {{ ["Lunes","Martes","Miércoles","Jueves","Viernes"][$dia-1] }}</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Horarios del día {{ $nombreDia }}</h2>
+        
+        {{-- Botones para cambiar turno --}}
+        <div class="btn-group">
+            <a href="{{ route('horarios.mostrarPorDia', ['dia' => $dia, 'turno' => 'mañana']) }}" 
+               class="btn btn-outline-primary {{ $turno == 'mañana' ? 'active' : '' }}">
+                Turno Mañana
+            </a>
+            <a href="{{ route('horarios.mostrarPorDia', ['dia' => $dia, 'turno' => 'tarde']) }}" 
+               class="btn btn-outline-primary {{ $turno == 'tarde' ? 'active' : '' }}">
+                Turno Tarde
+            </a>
+        </div>
+    </div>
 
-    <table class="table table-bordered text-center align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Curso</th>
-                @foreach($modulos as $modulo)
-                    <th>
-                        {{ $modulo->nombre }}<br>
-                        <small>{{ $modulo->hora_inicio }} - {{ $modulo->hora_fin }}</small>
-                    </th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($cursosVisibles as $curso)
+    @if($cursos->isEmpty())
+        <div class="alert alert-info">No hay cursos para el turno {{ $turno }}</div>
+    @else
+        <table class="table table-bordered">
+            <thead class="table-dark">
                 <tr>
-                    <th>{{ $curso->anio }}° {{ $curso->division }}</th>
+                    <th>Curso</th>
                     @foreach($modulos as $modulo)
-                        @php
-                            // Acceso seguro al grid para evitar claves no definidas
-                            $aula = $grid[$curso->id][$modulo->id] ?? 'Vacío';
-                            $clase = $aula === 'Vacío' ? 'bg-light text-muted' : 'text-white';
-                        @endphp
-                        <td class="{{ $clase }}" style="background-color: {{ $aula !== 'Vacío' ? '#' . substr(md5($aula), 0, 6) : '' }}">
-                            {{ $aula }}
-                        </td>
+                        <th>
+                            {{ $modulo->hora_inicio }} - {{ $modulo->hora_final }}
+                        </th>
                     @endforeach
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach($cursos as $curso)
+                    <tr>
+                        <th>{{ $curso->anio }}° {{ $curso->division }}</th>
+                        @foreach($modulos as $modulo)
+                            <td>{{ $grid[$curso->id][$modulo->id] ?? '—' }}</td>
+                        @endforeach
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </div>
 @endsection

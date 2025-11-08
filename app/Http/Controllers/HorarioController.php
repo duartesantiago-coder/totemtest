@@ -3,32 +3,45 @@ namespace App\Http\Controllers;
 
 use App\Models\Horario;
 use App\Models\Aula;
-use App\Http\Controllers\Controller;
 use App\Models\Modulo;
 use App\Models\Curso;
 use Illuminate\Http\Request;
 
 class HorarioController extends Controller
 {
+    private $dias = [
+        1 => 'Lunes',
+        2 => 'Martes', 
+        3 => 'Miércoles',
+        4 => 'Jueves',
+        5 => 'Viernes'
+    ];
+
     // Mostrar la grilla en modo lectura
     public function index(Curso $curso)
     {
-        // cargamos módulos (ordenados), aulas y horarios del curso
-        $modulos = Modulo::orderBy('id')->get();
+        // Determinar turno del curso
+        $turno = $curso->turno;
+
+        // Filtrar módulos por turno
+        $modulos = Modulo::where('turno', $turno)
+                        ->orderBy('hora_inicio')
+                        ->get();
+
         $aulas = Aula::orderBy('nombre')->get();
 
-        // traemos todos los horarios del curso con relaciones
+        // Obtener horarios del curso
         $horarios = Horario::with(['aula', 'modulo'])
-            ->where('curso_id', $curso->id)
-            ->get();
+                          ->where('curso_id', $curso->id)
+                          ->get();
 
-        // reorganizamos en un array [modulo_id][dia] => horario
+        // Crear grid para la vista
         $grid = [];
         foreach ($horarios as $h) {
-            $grid[$h->modulo_id][$h->dia] = $h; // dia es el ENUM (1..5)
+            $grid[$h->modulo_id][$h->dia] = $h;
         }
 
-        return view('horarios.index', compact('curso','modulos','aulas','grid'));
+        return view('horarios.index', compact('curso', 'modulos', 'aulas', 'grid'));
     }
 
     // Mostrar la grilla en modo edición (selects)
@@ -84,44 +97,54 @@ class HorarioController extends Controller
     }
 
     // Mostrar la tabla principal por día (ejemplo: /horarios/dia/1)
-    public function mostrarPorDia($dia)
+    public function mostrarPorDia($dia, $turno = 'mañana')
     {
-        // Obtener módulos, días y cursos
-        $modulos = \App\Models\Modulo::orderBy('id')->get();
-        $dias = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes'];
-        $nombreDia = $dias[$dia] ?? 'Desconocido';
+        // Validar día
+        if (!isset($this->dias[$dia])) {
+            abort(404, 'Día no válido');
+        }
 
-        // Traer todos los horarios de ese día con relaciones
-        $horarios = Horario::with(['curso', 'aula', 'modulo'])
-            ->where('dia', $dia)
-            ->get();
+        // Nombre del día para la vista
+        $nombreDia = $this->dias[$dia];
 
-        // Construir grid [curso_id][modulo_id] => aulaNombre | 'Vacío'
-        $cursos = Curso::orderBy('anio')->orderBy('division')->get();
-        $vacioId = Aula::where('nombre', 'Vacío')->value('id');
+        // Filtrar módulos por turno
+        $modulos = Modulo::where('turno', $turno)
+                        ->orderBy('hora_inicio')
+                        ->get();
+
+        // Filtrar cursos por turno
+        $cursos = Curso::where('turno', $turno)
+                      ->orderBy('anio')
+                      ->orderBy('division')
+                      ->get();
+
+        // Obtener horarios para este día
+        $horarios = Horario::with(['aula', 'modulo'])
+                          ->where('dia', $dia)
+                          ->whereHas('curso', function($query) use ($turno) {
+                              $query->where('turno', $turno);
+                          })
+                          ->get();
+
+        // Crear grid para la vista
         $grid = [];
-
         foreach ($cursos as $curso) {
             foreach ($modulos as $modulo) {
-                $horario = $horarios
-                    ->where('curso_id', $curso->id)
-                    ->where('modulo_id', $modulo->id)
-                    ->first();
-
-                $grid[$curso->id][$modulo->id] = $horario && $horario->aula_id != $vacioId
-                    ? ($horario->aula->nombre ?? 'Vacío')
-                    : 'Vacío';
+                $horario = $horarios->first(function($h) use ($curso, $modulo) {
+                    return $h->curso_id == $curso->id && $h->modulo_id == $modulo->id;
+                });
+                $grid[$curso->id][$modulo->id] = $horario ? ($horario->aula->nombre ?? 'Vacío') : 'Vacío';
             }
         }
 
-        // Filtrar cursos que tengan al menos una aula distinta de 'Vacío'
-        $cursosVisibles = $cursos->filter(function ($curso) use ($grid) {
-            return collect($grid[$curso->id] ?? [])->contains(function ($aula) {
-                return $aula !== 'Vacío';
-            });
-        });
-
-        return view('horarios.dia', compact('modulos', 'cursosVisibles', 'grid', 'dia', 'nombreDia', 'cursos'));
+        return view('horarios.dia', compact(
+            'modulos',
+            'cursos',
+            'grid',
+            'dia',
+            'turno',
+            'nombreDia'
+        ));
     }
 
 
@@ -148,4 +171,4 @@ class HorarioController extends Controller
 // tenés que asegurarte de que en el método mostrarPorDia se estén pasando las variables correctas a la vista
 // tenés que agregar compact('cursos','dia','nombreDia','horarios','modulos', 'cursosVisibles', 'grid');
 // al final del return view(...) en el método mostrarPorDia y si lo estas haciendo bien, revisar que los nombres de las variables en la vista coincidan con los que se están pasando desde el controlador
-// grid deberia estar 
+// grid deberia estar

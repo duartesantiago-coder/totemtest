@@ -14,6 +14,7 @@ class CreateModulosTable extends Migration
             $table->time('hora_inicio');
             $table->time('hora_final');
             $table->timestamps();
+            $table->enum('turno', ['mañana', 'tarde']);
         });
     }
 

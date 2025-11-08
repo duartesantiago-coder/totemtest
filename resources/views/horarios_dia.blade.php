@@ -22,6 +22,16 @@
                         {{ $horarios->first()->curso->anio }}° {{ $horarios->first()->curso->division }}
                     </h5>
                 </div>
+                <div class="mb-3 text-center">
+                    <a href="{{ route('horarios.mostrarPorDia', ['dia' => $dia, 'turno' => 'mañana']) }}" 
+                    class="btn btn-primary {{ $turno == 'mañana' ? 'active' : '' }}">
+                    Turno Mañana
+                    </a>
+                    <a href="{{ route('horarios.mostrarPorDia', ['dia' => $dia, 'turno' => 'tarde']) }}" 
+                    class="btn btn-secondary {{ $turno == 'tarde' ? 'active' : '' }}">
+                    Turno Tarde
+                    </a>
+                </div>                
                 <div class="card-body p-0">
                     <table class="table table-bordered mb-0">
                         <thead class="table-light">

@@ -38,5 +38,9 @@ Route::prefix('cursos/{curso}')->group(function () { // lo que hace es agrupar l
     Route::get('horarios/edit', [HorarioController::class, 'edit'])->name('horarios.edit');
     Route::put('horarios', [HorarioController::class, 'update'])->name('horarios.update');
 });
-Route::get('/horarios/dia/{dia}', [HorarioController::class, 'mostrarPorDia'])->name('horarios.dia');
+// Ruta para ver horarios por día
+Route::get('/horarios/dia/{dia}/{turno?}', [HorarioController::class, 'mostrarPorDia'])
+    ->name('horarios.mostrarPorDia')
+    ->where(['dia' => '[1-5]', 'turno' => 'mañana|tarde']);
+
 

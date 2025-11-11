@@ -1,53 +1,62 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h3>Editar Horarios - {{ $curso->anio }}° {{ $curso->division }}</h3>
+<div class="container mt-4">
+    <h3 class="mb-4">Editar Horarios - {{ $curso->anio }}° {{ $curso->division }}</h3>
 
     <form action="{{ route('horarios.update', $curso) }}" method="POST">
         @csrf
-        @method('PUT')
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Módulo</th>
-                    <th>Lunes</th>
-                    <th>Martes</th>
-                    <th>Miércoles</th>
-                    <th>Jueves</th>
-                    <th>Viernes</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($modulos as $modulo)
-                    <tr>
-                        <td>{{ $modulo->hora_inicio }} - {{ $modulo->hora_fin }}</td>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Módulo</th>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miércoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($modulos as $modulo)
+                            <tr>
+                                <td class="fw-bold">
+                                    {{ $modulo->hora_inicio }} - {{ $modulo->hora_final }}
+                                </td>
+                                @for($dia = 1; $dia <= 5; $dia++)
+                                    @php
+                                        $horario = $grid[$modulo->id][$dia] ?? null;
+                                    @endphp
+                                    <td>
+                                        <select name="aula[{{ $horario->id ?? 0 }}]" class="form-select form-select-sm">
+                                            <option value="">-- Seleccionar aula --</option>
+                                            @foreach($aulas as $aula)
+                                                <option value="{{ $aula->id }}" 
+                                                    {{ ($horario && $horario->aula_id == $aula->id) ? 'selected' : '' }}>
+                                                    {{ $aula->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                @endfor
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                        @for($d=1; $d<=5; $d++)
-                            <td>
-                                @if(isset($grid[$modulo->id][$d]))
-                                    @php $h = $grid[$modulo->id][$d]; @endphp
-                                    <select name="aula[{{ $h->id }}]" class="form-control">
-                                        @foreach($aulas as $aula)
-                                            <option value="{{ $aula->id }}" {{ $aula->id == $h->aula_id ? 'selected' : '' }}>
-                                                {{ $aula->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                @else
-                                    {{-- Si no existe la fila de horario para este módulo y día, podés mostrar un select vacío o crear el horario --}}
-                                    —
-                                @endif
-                            </td>
-                        @endfor
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <a href="{{ route('horarios.index', $curso) }}" class="btn btn-secondary">Cancelar</a>
-        <button type="submit" class="btn btn-success">Guardar</button>
+        <div class="mt-3">
+            <a href="{{ route('horarios.index', $curso) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+        </div>
     </form>
 </div>
 @endsection

@@ -47,17 +47,26 @@ class HorarioController extends Controller
     // Mostrar la grilla en modo edición (selects)
     public function edit(Curso $curso)
     {
-        $modulos = Modulo::orderBy('id')->get();
+        $turno = $curso->turno;
+
+        $modulos = Modulo::where('turno', $turno)
+                        ->orderBy('hora_inicio')
+                        ->get();
+
         $aulas = Aula::orderBy('nombre')->get();
-        $horarios = Horario::with('aula')->where('curso_id', $curso->id)->get();
+
+        $horarios = Horario::with('aula')
+                          ->where('curso_id', $curso->id)
+                          ->get();
 
         $grid = [];
         foreach ($horarios as $h) {
             $grid[$h->modulo_id][$h->dia] = $h;
         }
 
-        return view('horarios.edit', compact('curso','modulos','aulas','grid', ));
+        return view('horarios.edit', compact('curso', 'modulos', 'aulas', 'grid'));
     }
+
     public function dia($dia)
     {
         $modulos = Modulo::orderBy('id')->get();
@@ -97,13 +106,16 @@ class HorarioController extends Controller
     }
 
     // Mostrar la tabla principal por día (ejemplo: /horarios/dia/1)
-    public function mostrarPorDia($dia, $turno = 'mañana')
+    public function mostrarPorDia($dia, Request $request)
     {
         // Validar día
         if (!isset($this->dias[$dia])) {
             abort(404, 'Día no válido');
         }
 
+        // Obtener turno del request (parámetro query), por defecto 'mañana'
+        $turno = $request->query('turno', 'mañana');
+        
         // Nombre del día para la vista
         $nombreDia = $this->dias[$dia];
 
@@ -118,7 +130,7 @@ class HorarioController extends Controller
                       ->orderBy('division')
                       ->get();
 
-        // Obtener horarios para este día
+        // Obtener horarios para este día y turno
         $horarios = Horario::with(['aula', 'modulo'])
                           ->where('dia', $dia)
                           ->whereHas('curso', function($query) use ($turno) {
@@ -164,6 +176,23 @@ class HorarioController extends Controller
 
 
         return redirect()->route('horarios.index', $curso)->with('success','Horarios actualizados.');
+    }
+
+    public function updateCurso(Request $request, Curso $curso)
+    {
+        // Recibir datos: aula[horario_id] => aula_id
+        $data = $request->input('aula', []);
+
+        foreach ($data as $horario_id => $aula_id) {
+            $horario = Horario::find($horario_id);
+            if ($horario && $horario->curso_id == $curso->id) {
+                $horario->aula_id = $aula_id;
+                $horario->save();
+            }
+        }
+
+        return redirect()->route('horarios.mostrarPorDia', ['dia' => 1, 'turno' => $curso->turno])
+                       ->with('success', 'Horarios actualizados correctamente.');
     }
 }
 // si aparece Clave de matriz no definida 1 en horarios/dia.blade.php

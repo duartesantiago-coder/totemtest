@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\CursoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,16 +40,30 @@ Route::prefix('cursos/{curso}')->group(function () { // lo que hace es agrupar l
     Route::get('horarios/edit', [HorarioController::class, 'edit'])->name('horarios.edit');
     Route::put('horarios', [HorarioController::class, 'update'])->name('horarios.update');
 });
-// Ruta para ver horarios por día
+
+// Toggle "modo traspao" — POST estático con recarga
+Route::post('/modo-traspao/toggle', function (Request $request) {
+    $nuevo = ! $request->session()->get('modo_traspao', false);
+    $request->session()->put('modo_traspao', $nuevo);
+    $request->session()->flash('success', 'Modo traspao '.($nuevo ? 'activado' : 'desactivado'));
+    return redirect()->back();
+})->name('modo.toggle');
+
+// Ruta pública para ver horarios por día
 Route::get('/horarios/dia/{dia}', [HorarioController::class, 'mostrarPorDia'])
-    ->name('horarios.mostrarPorDia');
+    ->name('horarios.mostrarPorDia')
+    ->where('dia', '[1-5]');
 
 // Rutas protegidas para administradores
 Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::post('/cursos/{curso}/toggle-turno', [CursoController::class, 'toggleTurno'])
         ->name('cursos.toggleTurno');
-    Route::resource('horarios', HorarioController::class)
-        ->except(['show', 'index']);
+    
+    Route::get('/cursos/{curso}/horarios/edit', [HorarioController::class, 'edit'])
+        ->name('horarios.edit');
+    
+    Route::post('/cursos/{curso}/horarios/update', [HorarioController::class, 'updateCurso'])
+        ->name('horarios.update');
 });
 
 

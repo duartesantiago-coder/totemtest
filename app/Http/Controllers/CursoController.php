@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Curso;
 use App\Http\Requests\StoreCursoRequest;
 use App\Http\Requests\UpdateCursoRequest;
+use Illuminate\Http\Request;
 
 class CursoController extends Controller
 {
@@ -96,5 +97,15 @@ class CursoController extends Controller
     public function destroy(Curso $curso)
     {
         //
+    }
+
+    public function toggleTurno(Request $request, Curso $curso)
+    {
+        // Alternar turno: si es 'tarde' → 'mañana', si no → 'tarde'
+        $curso->turno = ($curso->turno === 'tarde') ? 'mañana' : 'tarde';
+        $curso->save();
+
+        $request->session()->flash('success', "Turno del curso {$curso->anio}° {$curso->division} cambiado a {$curso->turno}.");
+        return redirect()->back();
     }
 }

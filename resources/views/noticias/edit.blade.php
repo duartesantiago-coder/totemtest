@@ -6,7 +6,7 @@
         <div class="col-12 col-md-8">
             <h1 class="h3 mb-4">Editar Noticia</h1>
 
-            <form action="{{ route('noticias.update', $noticia) }}" method="POST" class="card card-modern p-4">
+            <form action="{{ route('noticias.update', $noticia) }}" method="POST" enctype="multipart/form-data" class="card card-modern p-4">
                 @csrf
 
                 <div class="mb-3">
@@ -27,6 +27,17 @@
                     <input type="checkbox" class="form-check-input" id="publicada" name="publicada" value="1" 
                            {{ $noticia->publicada ? 'checked' : '' }}>
                     <label class="form-check-label" for="publicada">Publicada</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imagen" class="form-label">Imagen (opcional)</label>
+                    @if($noticia->imagen)
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/' . $noticia->imagen) }}" alt="imagen" style="max-width:100%; height:auto;">
+                        </div>
+                    @endif
+                    <input type="file" class="form-control @error('imagen') is-invalid @enderror" id="imagen" name="imagen">
+                    @error('imagen') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="d-flex gap-2">

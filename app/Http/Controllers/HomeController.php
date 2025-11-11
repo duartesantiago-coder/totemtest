@@ -24,6 +24,10 @@ class HomeController extends Controller
     
     public function index() {
         $cursos = Curso::orderBy('anio')->orderBy('division')->get();
-        return view('home', compact('cursos'));
+        $noticias = \App\Models\Noticia::where('publicada', true)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        return view('home', compact('cursos','noticias'));
     }
 }

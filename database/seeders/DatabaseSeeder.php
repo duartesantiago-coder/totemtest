@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ModuloSeeder::class);
         $this->call(EfemerideSeeder::class);
         $this->call(NoticiaSeeder::class);   
+    $this->call(EditorUserSeeder::class);
         //$this->call(UserSeeder::class);
         $this->call(HorarioSeeder::class);           
     }

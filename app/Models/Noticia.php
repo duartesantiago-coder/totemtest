@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Noticia extends Model
 {
-    protected $fillable = ['titulo', 'contenido', 'autor_id', 'publicada'];
+    protected $fillable = ['titulo', 'contenido', 'autor_id', 'publicada', 'imagen'];
     
     public function autor()
     {

@@ -38,6 +38,8 @@
         </tbody>
     </table>
 
-    <a href="{{ route('horarios.edit', $curso) }}" class="btn btn-primary">Editar</a>
+    @if(auth()->check() && auth()->user()->is_admin)
+        <a href="{{ route('horarios.edit', $curso) }}" class="btn btn-primary">Editar</a>
+    @endif
 </div>
 @endsection

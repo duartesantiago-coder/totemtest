@@ -55,6 +55,20 @@ Route::get('/horarios/dia/{dia}', [HorarioController::class, 'mostrarPorDia'])
     ->name('horarios.mostrarPorDia')
     ->where('dia', '[1-5]');
 
+// Ruta pública para listar noticias (index)
+Route::get('/noticias', [NoticiaController::class, 'index'])->name('noticias.index');
+// Ruta pública para ver una noticia individual (restringir {noticia} a id numérico para no colisionar con rutas como /noticias/crear)
+Route::get('/noticias/{noticia}', [NoticiaController::class, 'show'])->name('noticias.show')->where('noticia', '[0-9]+');
+
+// Rutas para crear/editar/eliminar noticias: permitidas a admins o editores
+Route::middleware(['auth', 'editor_or_admin'])->group(function () {
+    Route::get('/noticias/crear', [NoticiaController::class, 'create'])->name('noticias.create');
+    Route::post('/noticias', [NoticiaController::class, 'store'])->name('noticias.store');
+    Route::get('/noticias/{noticia}/editar', [NoticiaController::class, 'edit'])->name('noticias.edit');
+    Route::post('/noticias/{noticia}', [NoticiaController::class, 'update'])->name('noticias.update');
+    Route::post('/noticias/{noticia}/eliminar', [NoticiaController::class, 'destroy'])->name('noticias.destroy');
+});
+
 // Rutas protegidas para administradores
 Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::post('/cursos/{curso}/toggle-turno', [CursoController::class, 'toggleTurno'])
@@ -66,12 +80,12 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::post('/cursos/{curso}/horarios/update', [HorarioController::class, 'updateCurso'])
         ->name('horarios.update');
         
-    // Rutas para noticias
-    Route::get('/noticias/crear', [NoticiaController::class, 'create'])->name('noticias.create');
-    Route::post('/noticias', [NoticiaController::class, 'store'])->name('noticias.store');
-    Route::get('/noticias/{noticia}/editar', [NoticiaController::class, 'edit'])->name('noticias.edit');
-    Route::post('/noticias/{noticia}', [NoticiaController::class, 'update'])->name('noticias.update');
-    Route::post('/noticias/{noticia}/eliminar', [NoticiaController::class, 'destroy'])->name('noticias.destroy');
+    // Panel de administración de usuarios (marcar como editor)
+    Route::get('/admin/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users/{user}/toggle-editor', [\App\Http\Controllers\Admin\UserController::class, 'toggleEditor'])->name('admin.users.toggleEditor');
+    Route::post('/admin/users/{user}/toggle-admin', [\App\Http\Controllers\Admin\UserController::class, 'toggleAdmin'])->name('admin.users.toggleAdmin');
+
+    // (moved) Rutas para noticias - ahora protegidas por middleware editor_or_admin
 });
 
 

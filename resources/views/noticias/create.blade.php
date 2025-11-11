@@ -6,7 +6,7 @@
         <div class="col-12 col-md-8">
             <h1 class="h3 mb-4">Nueva Noticia</h1>
 
-            <form action="{{ route('noticias.store') }}" method="POST" class="card card-modern p-4">
+            <form action="{{ route('noticias.store') }}" method="POST" enctype="multipart/form-data" class="card card-modern p-4">
                 @csrf
 
                 <div class="mb-3">
@@ -26,6 +26,12 @@
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="publicada" name="publicada" value="1" checked>
                     <label class="form-check-label" for="publicada">Publicar inmediatamente</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imagen" class="form-label">Imagen (opcional)</label>
+                    <input type="file" class="form-control @error('imagen') is-invalid @enderror" id="imagen" name="imagen">
+                    @error('imagen') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="d-flex gap-2">

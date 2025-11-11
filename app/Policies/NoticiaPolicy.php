@@ -11,6 +11,16 @@ class NoticiaPolicy
     use HandlesAuthorization;
 
     /**
+     * Antes de cualquier verificación, permitir a administradores.
+     */
+    public function before(User $user, $ability)
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+    }
+
+    /**
      * Determine whether the user can view any models.
      *
      * @param  \App\Models\User  $user
@@ -53,7 +63,8 @@ class NoticiaPolicy
      */
     public function update(User $user, Noticia $noticia)
     {
-        //
+        // Permitir al autor de la noticia actualizarla
+        return $user->id === $noticia->autor_id;
     }
 
     /**
@@ -65,7 +76,8 @@ class NoticiaPolicy
      */
     public function delete(User $user, Noticia $noticia)
     {
-        //
+        // Permitir al autor de la noticia eliminarla
+        return $user->id === $noticia->autor_id;
     }
 
     /**

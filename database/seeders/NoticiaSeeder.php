@@ -18,8 +18,9 @@ class NoticiaSeeder extends Seeder
         Noticia::create([
             'titulo' => 'Nueva Biblioteca Escolar',
             'contenido' => 'Se ha inaugurado una nueva biblioteca en la escuela con una amplia colección de libros para todas las edades.',
-            'fecha' => '2024-09-01 10:00:00',
-            'imagen' => 'biblioteca.jpg',
+            // 'fecha' e 'imagen' no existen en la tabla 'noticias' según la migración.
+            // Guardamos solo los campos definidos en el modelo/migración.
+            'publicada' => true,
         ]);
     }
 }

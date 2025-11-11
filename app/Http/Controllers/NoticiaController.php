@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Noticia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class NoticiaController extends Controller
 {
@@ -41,10 +42,17 @@ class NoticiaController extends Controller
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'contenido' => 'required|string',
-            'publicada' => 'boolean'
+            'publicada' => 'boolean',
+            'imagen' => 'nullable|image|max:2048'
         ]);
 
         $validated['autor_id'] = auth()->id();
+
+        // Manejar upload de imagen si existe
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('noticias', 'public');
+            $validated['imagen'] = $path;
+        }
 
         Noticia::create($validated);
 
@@ -60,7 +68,14 @@ class NoticiaController extends Controller
      */
     public function show(Noticia $noticia)
     {
-        //
+        // Permitir ver la noticia solo si está publicada, o si el usuario es admin/autor
+        if (! $noticia->publicada) {
+            if (! auth()->check() || (! auth()->user()->isAdmin() && auth()->id() !== $noticia->autor_id)) {
+                abort(403);
+            }
+        }
+
+        return view('noticias.show', compact('noticia'));
     }
 
     /**
@@ -89,8 +104,19 @@ class NoticiaController extends Controller
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'contenido' => 'required|string',
-            'publicada' => 'boolean'
+            'publicada' => 'boolean',
+            'imagen' => 'nullable|image|max:2048'
         ]);
+
+        // Manejar reemplazo de imagen
+        if ($request->hasFile('imagen')) {
+            // borrar anterior si existe
+            if ($noticia->imagen) {
+                Storage::disk('public')->delete($noticia->imagen);
+            }
+            $path = $request->file('imagen')->store('noticias', 'public');
+            $validated['imagen'] = $path;
+        }
 
         $noticia->update($validated);
 

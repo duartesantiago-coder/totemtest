@@ -7,18 +7,39 @@
         <div>
             <h1 class="h3 mb-1">Gestión de Horarios</h1>
             <p class="text-muted mb-0">Consulta y administra los horarios por curso y por día.</p>
+
+            {{-- Carrusel de noticias (debajo del encabezado) --}}
+            @if(isset($noticias) && $noticias->isNotEmpty())
+                <div id="noticiasCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @foreach($noticias as $idx => $n)
+                            <div class="carousel-item {{ $idx === 0 ? 'active' : '' }}" style="min-height:150px;">
+                                <div class="d-flex gap-3 align-items-center h-100">
+                                    @if($n->imagen)
+                                        <img src="{{ asset('storage/' . $n->imagen) }}" class="d-none d-md-block" style="width:160px; height:120px; object-fit:cover; border-radius:6px; flex-shrink:0;" alt="{{ $n->titulo }}">
+                                    @endif
+                                    <div style="flex:1; min-width:0;">
+                                        <a href="{{ route('noticias.show', $n) }}" class="fw-semibold d-block">{{ Str::limit($n->titulo, 80) }}</a>
+                                        <div class="small text-muted">{{ $n->created_at->format('d/m/Y H:i') }}</div>
+                                        <div class="small text-truncate" style="max-width:600px;">{{ Str::limit($n->contenido, 160) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#noticiasCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#noticiasCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
+                </div>
+            @endif
         </div>
 
         <div class="mt-3 mt-md-0 d-flex gap-2 align-items-center">
-            {{-- Estado del modo traspao (form POST, recarga) --}}
-            <form action="{{ route('modo.toggle') }}" method="POST">
-                @csrf
-                <button type="submit"
-                        class="btn btn-sm {{ session('modo_traspao') ? 'btn-warning' : 'btn-outline-secondary' }}">
-                    {{ session('modo_traspao') ? 'Modo traspao: ON' : 'Modo traspao: OFF' }}
-                </button>
-            </form>
-
             {{-- Acceso rápido a días --}}
             <div class="btn-group btn-group-sm" role="group" aria-label="Días">
                 @foreach ([1=>'Lun',2=>'Mar',3=>'Mié',4=>'Jue',5=>'Vie'] as $num => $abbr)
@@ -96,11 +117,11 @@
         <div class="col-12 col-lg-3">
             <div class="card card-modern p-3 mb-3">
                 <h3 class="h6 mb-2">Acerca del modo</h3>
-                <p class="small text-muted mb-0">Activa "Modo traspao" para cambiar el turno de un curso desde su tarjeta. Sin el modo activado, los botones navegan a la vista de horarios.</p>
+                <p class="small text-muted mb-0">Cambia el turno de un curso desde su tarjeta para que cambie en la vista de horarios.</p>
             </div>
 
             <div class="card card-modern p-3">
-                <h3 class="h6 mb-2">Atajos</h3>
+                <h3 class="h6 mb-2">Horarios, tablas principales</h3>
                 <div class="d-flex flex-column gap-2">
                     <a href="{{ url('/horarios/dia/1') }}" class="btn btn-sm btn-outline-info text-start">Ver Lunes</a>
                     <a href="{{ url('/horarios/dia/2') }}" class="btn btn-sm btn-outline-info text-start">Ver Martes</a>
@@ -113,7 +134,10 @@
             @if(auth()->check() && auth()->user()->is_admin)
                 <div class="card card-modern p-3 mt-3">
                     <h3 class="h6 mb-2">Administración</h3>
-                    <a href="{{ route('horarios.edit', isset($cursosAll[0]) ? $cursosAll[0] : 1) }}" class="btn btn-sm btn-warning w-100">Editar horarios</a>
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('horarios.edit', isset($cursosAll[0]) ? $cursosAll[0] : 1) }}" class="btn btn-sm btn-warning w-100">Editar horarios</a>
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-outline-primary w-100">Gestionar usuarios</a>
+                    </div>
                 </div>
             @endif
 

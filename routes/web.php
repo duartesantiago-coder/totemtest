@@ -39,8 +39,15 @@ Route::prefix('cursos/{curso}')->group(function () { // lo que hace es agrupar l
     Route::put('horarios', [HorarioController::class, 'update'])->name('horarios.update');
 });
 // Ruta para ver horarios por día
-Route::get('/horarios/dia/{dia}/{turno?}', [HorarioController::class, 'mostrarPorDia'])
-    ->name('horarios.mostrarPorDia')
-    ->where(['dia' => '[1-5]', 'turno' => 'mañana|tarde']);
+Route::get('/horarios/dia/{dia}', [HorarioController::class, 'mostrarPorDia'])
+    ->name('horarios.mostrarPorDia');
+
+// Rutas protegidas para administradores
+Route::middleware(['auth', 'is_admin'])->group(function () {
+    Route::post('/cursos/{curso}/toggle-turno', [CursoController::class, 'toggleTurno'])
+        ->name('cursos.toggleTurno');
+    Route::resource('horarios', HorarioController::class)
+        ->except(['show', 'index']);
+});
 
 

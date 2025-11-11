@@ -90,6 +90,17 @@
             </div>
         </div>
     @endif
+
+    @if(auth()->check() && auth()->user()->isAdmin())
+        {{-- Mostrar botones de edición solo a admins --}}
+        <div class="btn-group shadow mt-3">
+            @foreach($cursos as $curso)
+                <a href="{{ route('horarios.edit', $curso) }}" class="btn btn-warning me-2">
+                    <i class="fas fa-edit"></i> Editar {{ $curso->anio }}° {{ $curso->division }}
+                </a>
+            @endforeach
+        </div>
+    @endif
 </div>
 
 {{-- Agregar FontAwesome si no está incluido en app.blade.php --}}

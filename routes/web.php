@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\NoticiaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +65,13 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     
     Route::post('/cursos/{curso}/horarios/update', [HorarioController::class, 'updateCurso'])
         ->name('horarios.update');
+        
+    // Rutas para noticias
+    Route::get('/noticias/crear', [NoticiaController::class, 'create'])->name('noticias.create');
+    Route::post('/noticias', [NoticiaController::class, 'store'])->name('noticias.store');
+    Route::get('/noticias/{noticia}/editar', [NoticiaController::class, 'edit'])->name('noticias.edit');
+    Route::post('/noticias/{noticia}', [NoticiaController::class, 'update'])->name('noticias.update');
+    Route::post('/noticias/{noticia}/eliminar', [NoticiaController::class, 'destroy'])->name('noticias.destroy');
 });
 
 

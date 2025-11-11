@@ -5,18 +5,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNoticiasTable extends Migration
+return new class extends Migration
 {
     public function up()
     {
         Schema::create('noticias', function (Blueprint $table) {
             $table->id();
-            $table->string('titulo', 100);
+            $table->string('titulo');
             $table->text('contenido');
-            $table->dateTime('fecha')->nullable();
-            $table->string('imagen')->nullable();
+            $table->unsignedBigInteger('autor_id')->nullable();
+            $table->boolean('publicada')->default(false);
             $table->timestamps();
-
+            $table->foreign('autor_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
@@ -24,4 +24,4 @@ class CreateNoticiasTable extends Migration
     {
         Schema::dropIfExists('noticias');
     }
-}
+};

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Noticia;
-use App\Http\Requests\StoreNoticiaRequest;
-use App\Http\Requests\UpdateNoticiaRequest;
+use Illuminate\Http\Request;
 
 class NoticiaController extends Controller
 {
@@ -15,7 +14,10 @@ class NoticiaController extends Controller
      */
     public function index()
     {
-        //
+        $noticias = Noticia::where('publicada', true)
+                           ->orderBy('created_at', 'desc')
+                           ->paginate(5);
+        return view('noticias.index', compact('noticias'));
     }
 
     /**
@@ -25,18 +27,29 @@ class NoticiaController extends Controller
      */
     public function create()
     {
-        //
+        return view('noticias.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreNoticiaRequest  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreNoticiaRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
+            'publicada' => 'boolean'
+        ]);
+
+        $validated['autor_id'] = auth()->id();
+
+        Noticia::create($validated);
+
+        return redirect()->route('noticias.index')
+                       ->with('success', 'Noticia publicada correctamente.');
     }
 
     /**
@@ -58,19 +71,31 @@ class NoticiaController extends Controller
      */
     public function edit(Noticia $noticia)
     {
-        //
+        $this->authorize('update', $noticia);
+        return view('noticias.edit', compact('noticia'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateNoticiaRequest  $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Noticia  $noticia
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateNoticiaRequest $request, Noticia $noticia)
+    public function update(Request $request, Noticia $noticia)
     {
-        //
+        $this->authorize('update', $noticia);
+
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
+            'publicada' => 'boolean'
+        ]);
+
+        $noticia->update($validated);
+
+        return redirect()->route('noticias.index')
+                       ->with('success', 'Noticia actualizada correctamente.');
     }
 
     /**
@@ -81,6 +106,10 @@ class NoticiaController extends Controller
      */
     public function destroy(Noticia $noticia)
     {
-        //
+        $this->authorize('delete', $noticia);
+        $noticia->delete();
+
+        return redirect()->route('noticias.index')
+                       ->with('success', 'Noticia eliminada.');
     }
 }

@@ -116,6 +116,25 @@
                     <a href="{{ route('horarios.edit', isset($cursosAll[0]) ? $cursosAll[0] : 1) }}" class="btn btn-sm btn-warning w-100">Editar horarios</a>
                 </div>
             @endif
+
+            {{-- Últimas noticias --}}
+            <div class="card card-modern p-3 mt-3">
+                <h3 class="h6 mb-2">Últimas Noticias</h3>
+                @php $noticias = \App\Models\Noticia::where('publicada', true)->orderBy('created_at', 'desc')->limit(3)->get(); @endphp
+                @if($noticias->isEmpty())
+                    <p class="small text-muted">No hay noticias.</p>
+                @else
+                    <div class="d-flex flex-column gap-2">
+                        @foreach($noticias as $noticia)
+                            <div style="padding:.5rem; border-left:3px solid #0ea5e9; background:rgba(14,165,233,0.05); border-radius:4px;">
+                                <small class="fw-semibold">{{ Str::limit($noticia->titulo, 50) }}</small>
+                                <div class="text-muted" style="font-size:.75rem;">{{ $noticia->created_at->format('d/m H:i') }}</div>
+                            </div>
+                        @endforeach
+                        <a href="{{ route('noticias.index') }}" class="btn btn-sm btn-outline-info mt-2">Ver todas</a>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>

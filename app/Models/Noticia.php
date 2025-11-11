@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Noticia extends Model
 {
-    protected $fillable = ['titulo','contenido','fecha','imagen'];
-
-
-     public function noticias()
-        {
-            return $this->hasMany(Noticia::class);
-        }
+    protected $fillable = ['titulo', 'contenido', 'autor_id', 'publicada'];
+    
+    public function autor()
+    {
+        return $this->belongsTo(User::class, 'autor_id');
+    }
 }

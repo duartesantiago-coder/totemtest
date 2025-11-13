@@ -15,10 +15,21 @@ class NoticiaController extends Controller
      */
     public function index()
     {
-        $noticias = Noticia::where('publicada', true)
-                           ->orderBy('created_at', 'desc')
-                           ->paginate(5);
-        return view('noticias.index', compact('noticias'));
+        // Soporta búsqueda por título/contenido con parámetro ?q=
+        $q = request()->query('q');
+        $query = Noticia::where('publicada', true);
+        if ($q) {
+            $query->where(function($sub) use ($q) {
+                $sub->where('titulo', 'like', "%{$q}%")
+                    ->orWhere('contenido', 'like', "%{$q}%");
+            });
+        }
+
+        $noticias = $query->orderBy('created_at', 'desc')
+                          ->paginate(9)
+                          ->withQueryString();
+
+        return view('noticias.index', compact('noticias', 'q'));
     }
 
     /**

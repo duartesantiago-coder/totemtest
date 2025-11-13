@@ -4,11 +4,20 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Noticias</h1>
-        @if(auth()->check() && (auth()->user()->is_admin || auth()->user()->isEditor()))
-            <a href="{{ route('noticias.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nueva Noticia
-            </a>
-        @endif
+        <div class="d-flex align-items-center gap-2">
+            <form method="GET" action="{{ route('noticias.index') }}" class="d-flex">
+                <input type="search" name="q" value="{{ old('q', $q ?? request('q')) }}" class="form-control form-control-sm" placeholder="Buscar noticias..." aria-label="Buscar noticias">
+                @if(request('q'))
+                    <a href="{{ route('noticias.index') }}" class="btn btn-outline-secondary btn-sm ms-2">Limpiar</a>
+                @endif
+            </form>
+
+            @if(auth()->check() && (auth()->user()->is_admin || auth()->user()->isEditor()))
+                <a href="{{ route('noticias.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Nueva
+                </a>
+            @endif
+        </div>
     </div>
 
     @if(session('success'))
@@ -16,7 +25,7 @@
     @endif
 
     @if($noticias->isEmpty())
-        <div class="alert alert-info">No hay noticias publicadas.</div>
+        <div class="alert alert-info">No hay noticias publicadas{{ request('q') ? ' para esa búsqueda' : '' }}.</div>
     @else
         <div class="row g-4">
             @foreach($noticias as $noticia)

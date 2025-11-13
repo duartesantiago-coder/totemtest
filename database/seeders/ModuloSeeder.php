@@ -16,22 +16,27 @@ class ModuloSeeder extends Seeder
     {
         // Módulos turno mañana
         $modulosManana = [
-            ['hora_inicio' => '07:30', 'hora_final' => '08:10'],
-            ['hora_inicio' => '08:10', 'hora_final' => '08:50'],
-            ['hora_inicio' => '09:00', 'hora_final' => '09:40'],
-            ['hora_inicio' => '09:40', 'hora_final' => '10:20'],
-            ['hora_inicio' => '10:30', 'hora_final' => '11:10'],
-            ['hora_inicio' => '11:10', 'hora_final' => '11:50']
+            ['hora_inicio' => '07:00', 'hora_final' => '07:40'],
+            ['hora_inicio' => '07:40', 'hora_final' => '08:15'],
+            ['hora_inicio' => '08:25', 'hora_final' => '09:05'],
+            ['hora_inicio' => '09:05', 'hora_final' => '09:40'],
+            ['hora_inicio' => '09:50', 'hora_final' => '10:30'],
+            ['hora_inicio' => '10:30', 'hora_final' => '11:05'],
+            ['hora_inicio' => '11:15', 'hora_final' => '11:55'],
+            ['hora_inicio' => '11:55', 'hora_final' => '12:30']
         ];
 
         // Módulos turno tarde
         $modulosTarde = [
-            ['hora_inicio' => '13:30', 'hora_final' => '14:10'],
-            ['hora_inicio' => '14:10', 'hora_final' => '14:50'],
-            ['hora_inicio' => '15:00', 'hora_final' => '15:40'],
-            ['hora_inicio' => '15:40', 'hora_final' => '16:20'],
-            ['hora_inicio' => '16:30', 'hora_final' => '17:10'],
-            ['hora_inicio' => '17:10', 'hora_final' => '17:50']
+            ['hora_inicio' => '12:30', 'hora_final' => '13:10'],
+            ['hora_inicio' => '13:10', 'hora_final' => '13:45'],
+            ['hora_inicio' => '13:55', 'hora_final' => '14:30'],
+            ['hora_inicio' => '14:30', 'hora_final' => '15:10'],
+            ['hora_inicio' => '15:20', 'hora_final' => '16:00'],
+            ['hora_inicio' => '16:00', 'hora_final' => '16:35'],
+            ['hora_inicio' => '16:45', 'hora_final' => '17:25'],
+            ['hora_inicio' => '17:25', 'hora_final' => '18:00']
+            
         ];
 
         foreach ($modulosManana as $modulo) {

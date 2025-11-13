@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>M.I.G.A</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
@@ -57,6 +57,7 @@
             width:100%;
             border-collapse: separate;
             border-spacing: 0;
+            table-layout: fixed;
         }
         table.table-modern thead th{
             background: linear-gradient(90deg, rgba(30,136,229,0.95), rgba(100,181,246,0.9));
@@ -105,6 +106,28 @@
             table.table-modern thead th { font-size:.78rem; padding:.6rem .4rem; }
             table.table-modern tbody td { font-size:.82rem; padding:.5rem .4rem; }
         }
+
+    /* Helpers for schedules table */
+    .table-wrap{ position:relative; }
+    .table-scroll{ overflow:auto; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; }
+    /* when we need the table to fit without scrolling, add .no-scroll to .table-scroll */
+    .table-scroll.no-scroll{ overflow:visible; }
+    /* default table layout: full width */
+    table.table-modern{ width:100%; table-layout: fixed; }
+    table.table-modern th, table.table-modern td{ padding:.45rem .45rem; font-size:.9rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+    table.table-modern th{ min-width:90px; }
+
+    /* compact mode: rotate headers and shrink padding/font to force fit */
+    table.table-modern.table-compact{ table-layout: fixed; width:100%; }
+    table.table-modern.table-compact th{ writing-mode: vertical-rl; transform: rotate(180deg); padding:.25rem .2rem; min-width:34px; font-size:.72rem; text-align:center; }
+    table.table-modern.table-compact td{ padding:.22rem .25rem; font-size:.78rem; white-space:normal; }
+    /* hide scroll buttons when using no-scroll */
+    .table-wrap .table-scroll.no-scroll ~ .scroll-btn{ display:none; }
+
+        .scroll-btn{ position:absolute; top:8px; width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.95); box-shadow:0 6px 18px rgba(2,6,23,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:30; border:0; }
+        .scroll-btn svg{ width:18px; height:18px; }
+        .scroll-btn.left{ left:6px; }
+        .scroll-btn.right{ right:6px; }
     </style>
 
     <!-- Scripts -->
@@ -115,8 +138,14 @@
     <div id="app" class="app-shell">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url('/') }}" style="font-weight:700; font-size:1.45rem; letter-spacing:1px;">
+                    <span style="display:inline-block; background:linear-gradient(135deg,#0ea5e9,#34d399); border-radius:8px; padding:2px 10px 2px 8px; margin-right:6px;">
+                        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+                            <circle cx="16" cy="16" r="16" fill="#0ea5e9"/>
+                            <path d="M8 20L16 8L24 20H8Z" fill="#fff"/>
+                        </svg>
+                    </span>
+                    <span style="font-family:'Inter',Nunito,sans-serif; color:#0ea5e9; text-shadow:0 2px 8px #e0f2fe;">M.I.G.A</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -125,7 +154,19 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
-
+                        <li class="nav-item">
+                            @php $noticiasCount = \App\Models\Noticia::where('publicada',1)->count(); @endphp
+                            <a class="nav-link fw-semibold {{ request()->routeIs('noticias.*') ? 'active' : '' }}" href="{{ route('noticias.index') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-newspaper me-1 mb-1" viewBox="0 0 16 16">
+                                  <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z"/>
+                                  <path d="M2 6h12v1H2V6zm0 2h12v1H2V8zm0 2h8v1H2v-1z"/>
+                                </svg>
+                                Noticias
+                                @if($noticiasCount > 0)
+                                    <span class="badge bg-danger ms-2">{{ $noticiasCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -150,14 +191,12 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
-
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    {{-- Logout como formulario para que funcione incluso si JS está deshabilitado --}}
+                                    <form action="{{ route('logout') }}" method="POST" style="display:flex; justify-content:center; width:100%;">
                                         @csrf
+                                        <button type="submit" class="dropdown-item text-center" style="background:none; border:0; padding:0.5rem 1rem; margin:0; width:100%; display:block;">
+                                            {{ __('Logout') }}
+                                        </button>
                                     </form>
                                 </div>
                             </li>
@@ -172,6 +211,35 @@
         </main>
     </div>
 
-    @stack('scripts')
+            {{-- Bootstrap JS bundle (required for modals/carousel/tooltips) --}}
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="" crossorigin="anonymous"></script>
+
+            <script>
+                // Simple dropdown toggle para el navbar
+                document.addEventListener('DOMContentLoaded', function() {
+                    var dropdownToggle = document.getElementById('navbarDropdown');
+                    if (dropdownToggle) {
+                        dropdownToggle.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            var menu = this.nextElementSibling;
+                            if (menu) {
+                                menu.classList.toggle('show');
+                                this.setAttribute('aria-expanded', menu.classList.contains('show'));
+                            }
+                        });
+                        
+                        // Cerrar dropdown al hacer click fuera
+                        document.addEventListener('click', function(e) {
+                            if (!e.target.closest('.dropdown')) {
+                                document.querySelectorAll('.dropdown-menu.show').forEach(function(m) {
+                                    m.classList.remove('show');
+                                });
+                            }
+                        });
+                    }
+                });
+            </script>
+
+            @stack('scripts')
 </body>
 </html>

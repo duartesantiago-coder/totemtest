@@ -16,6 +16,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // Home is protected by auth middleware — unauthenticated users are redirected to login
+        $response->assertStatus(302);
     }
 }

@@ -3,64 +3,68 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VerificationCodeMail;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
     protected function validator(array $data)
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'regex:/@esim\.edu\.ar$/'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.regex' => 'El correo debe pertenecer al dominio @esim.edu.ar',
+            'email.unique' => 'Este correo ya está registrado.',
         ]);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
-     */
+    public function register(Request $data)
+    {
+        $this->validator($data->all())->validate();
+
+        // Generar código de 5 cifras
+        $code = str_pad(random_int(0, 99999), 5, '0', STR_PAD_LEFT);
+
+        // Guardar en tabla temporal
+        DB::table('email_verifications')->updateOrCreate(
+            ['email' => $data->email],
+            [
+                'name' => $data->name,
+                'password' => Hash::make($data->password),
+                'verification_code' => $code,
+                'expires_at' => now()->addMinutes(15),
+            ]
+        );
+
+        // Enviar email con código
+        Mail::to($data->email)->send(new VerificationCodeMail($data->email, $code));
+
+        // Guardar en sesión
+        session([
+            'registration.email' => $data->email,
+            'registration.name' => $data->name,
+        ]);
+
+        return redirect()->route('verify-email.form');
+    }
+
     protected function create(array $data)
     {
         return User::create([
